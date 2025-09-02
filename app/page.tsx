@@ -311,7 +311,39 @@ Please provide more details and try converting again.`)
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-50 glass border-b border-glass-border">
+      {/* JSON-LD Schema Markup */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "WebApplication",
+            "name": "TricretParse",
+            "description": "AI-powered natural language to JSON converter tool for developers and data analysts",
+            "url": "https://prompt-to-json.vercel.app",
+            "applicationCategory": "DeveloperApplication",
+            "operatingSystem": "Web Browser",
+            "offers": {
+              "@type": "Offer",
+              "price": "0",
+              "priceCurrency": "USD"
+            },
+            "creator": {
+              "@type": "Organization",
+              "name": "TricretA"
+            },
+            "featureList": [
+              "Natural language to JSON conversion",
+              "AI-powered text parsing",
+              "Real-time JSON validation",
+              "Conversion history tracking",
+              "Advanced conversational AI"
+            ]
+          })
+        }}
+      />
+      
+      <header className="sticky top-0 z-50 glass border-b border-glass-border" role="banner">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -434,12 +466,12 @@ Please provide more details and try converting again.`)
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[calc(100vh-200px)]">
+      <main className="container mx-auto px-4 py-8" role="main">
+        <section className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[calc(100vh-200px)]" aria-label="JSON Conversion Tool">
           {/* Input Panel */}
-          <Card className="glass glow-primary p-6 flex flex-col">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-foreground">Natural Language Input</h2>
+          <article className="glass glow-primary p-6 flex flex-col" role="region" aria-labelledby="input-heading">
+            <header className="flex items-center justify-between mb-4">
+              <h1 className="text-lg font-semibold text-foreground" id="input-heading">Natural Language Input</h1>
               <Badge variant="outline" className="glass">
                 {inputText.length} chars
               </Badge>
@@ -472,12 +504,12 @@ Please provide more details and try converting again.`)
                 Clear
               </Button>
             </div>
-          </Card>
+          </article>
 
           {/* Output Panel */}
-          <Card className="glass glow-secondary p-6 flex flex-col">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-foreground">JSON Output</h2>
+          <article className="glass glow-secondary p-6 flex flex-col" role="region" aria-labelledby="output-heading">
+            <header className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-foreground" id="output-heading">JSON Output</h2>
               <div className="flex gap-2">
                 <Button variant="ghost" size="sm" onClick={handleCopyJson} disabled={!outputJson}>
                   <Copy className="w-4 h-4" />
@@ -495,18 +527,14 @@ Please provide more details and try converting again.`)
               </div>
             </div>
 
-            <div className="flex-1 bg-background/50 border border-glass-border rounded-lg p-4 overflow-auto">
+            <div className="flex-1 bg-background/50 border border-glass-border rounded-lg p-4 overflow-auto" role="textbox" aria-readonly="true" aria-label="Generated JSON output">
               <pre className="text-sm text-foreground whitespace-pre-wrap font-mono">
                 {outputJson || "JSON output will appear here..."}
               </pre>
             </div>
-          </Card>
-        </div>
-
-
+          </article>
+        </section>
       </main>
-
-
     </div>
   )
 }

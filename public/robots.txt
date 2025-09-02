@@ -1,0 +1,17 @@
+User-agent: *
+Allow: /
+
+# Disallow admin and API documentation
+Disallow: /admin/
+Disallow: /_next/
+Disallow: /api/docs/
+
+# Allow important pages
+Allow: /api/convert
+Allow: /api/advanced-convert
+
+# Sitemap location
+Sitemap: https://prompt-to-json.vercel.app/sitemap.xml
+
+# Crawl delay (optional)
+Crawl-delay: 1
