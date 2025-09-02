@@ -101,11 +101,8 @@ RESPONSE FORMAT:
 - Structure with clear, logical organization`
 
 export async function convertToBasicJSON(naturalLanguage: string): Promise<ConversationResult> {
-  console.log("AI Service - convertToBasicJSON called with input length:", naturalLanguage.length)
-
   const apiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY
   if (!apiKey) {
-    console.error("AI Service - API key missing")
     return {
       status: "ready",
       error:
@@ -114,7 +111,6 @@ export async function convertToBasicJSON(naturalLanguage: string): Promise<Conve
   }
 
   try {
-    console.log("AI Service - Calling Gemini API for basic conversion...")
     const { text, usage } = await generateText({
       model: google("gemini-1.5-flash", {
         apiKey: apiKey,
@@ -124,14 +120,11 @@ export async function convertToBasicJSON(naturalLanguage: string): Promise<Conve
       temperature: 0.3,
     })
 
-    console.log("AI Service - Basic Gemini response received:", text.substring(0, 200) + "...")
-
     const trimmedResponse = text.trim()
 
     // Try to parse as JSON
     try {
       const jsonResponse = JSON.parse(trimmedResponse)
-      console.log("AI Service - Valid basic JSON generated")
       return {
         status: "ready",
         json: JSON.stringify(jsonResponse, null, 2),
@@ -139,7 +132,6 @@ export async function convertToBasicJSON(naturalLanguage: string): Promise<Conve
       }
     } catch {
       // If not JSON, treat as clarification question
-      console.log("AI Service - Basic conversion requesting more information")
       return {
         status: "need_info",
         questions: [trimmedResponse],
@@ -147,7 +139,6 @@ export async function convertToBasicJSON(naturalLanguage: string): Promise<Conve
       }
     }
   } catch (error) {
-    console.error("AI Service - Basic conversion Gemini API Error:", error)
     return {
       status: "ready",
       error: error instanceof Error ? error.message : "Basic AI conversion failed",
@@ -159,11 +150,8 @@ export async function convertToAdvancedJSON(
   naturalLanguage: string,
   conversationHistory?: Array<{ role: string; content: string }>,
 ): Promise<ConversationResult> {
-  console.log("AI Service - convertToAdvancedJSON called with input length:", naturalLanguage.length)
-
   const apiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY
   if (!apiKey) {
-    console.error("AI Service - API key missing")
     return {
       status: "ready",
       error:
@@ -180,7 +168,6 @@ export async function convertToAdvancedJSON(
         "\n"
     }
 
-    console.log("AI Service - Calling Gemini API for advanced conversion...")
     const { text, usage } = await generateText({
       model: google("gemini-1.5-flash", {
         apiKey: apiKey,
@@ -192,14 +179,11 @@ Analyze this request and either extract key details into JSON format or ask for 
       temperature: 0.3,
     })
 
-    console.log("AI Service - Advanced Gemini response received:", text.substring(0, 200) + "...")
-
     const trimmedResponse = text.trim()
 
     // Try to parse as JSON first
     try {
       const jsonResponse = JSON.parse(trimmedResponse)
-      console.log("AI Service - Valid advanced JSON generated")
       return {
         status: "ready",
         json: JSON.stringify(jsonResponse, null, 2),
@@ -207,7 +191,6 @@ Analyze this request and either extract key details into JSON format or ask for 
       }
     } catch {
       // If not JSON, treat as clarification question
-      console.log("AI Service - Advanced conversion requesting more information")
       return {
         status: "need_info",
         questions: [trimmedResponse],
@@ -215,7 +198,6 @@ Analyze this request and either extract key details into JSON format or ask for 
       }
     }
   } catch (error) {
-    console.error("AI Service - Advanced conversion Gemini API Error:", error)
     return {
       status: "ready",
       error: error instanceof Error ? error.message : "Advanced AI conversion failed",
@@ -282,8 +264,6 @@ Errors to fix: ${validationErrors.join(", ")}`,
 }
 
 export async function autoDetectSchema(naturalLanguage: string, schemas: any[]): Promise<any> {
-  console.log("AI Service - Schema detection called (simplified mode)")
-
   // In simplified mode, we don't need complex schema detection
   // Just return a basic response to maintain compatibility
   return {

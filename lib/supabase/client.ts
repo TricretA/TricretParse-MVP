@@ -65,7 +65,6 @@ if (isSupabaseConfigured && supabaseUrl && supabaseAnonKey) {
   try {
     supabase = createSupabaseClient(supabaseUrl, supabaseAnonKey)
   } catch (error) {
-    console.error("Failed to create Supabase client:", error)
     supabase = null
   }
 }
@@ -185,14 +184,12 @@ export interface Conversion {
  */
 export function createClient() {
   if (!isSupabaseConfigured || !supabaseUrl || !supabaseAnonKey) {
-    console.warn('Supabase is not properly configured')
     return null
   }
 
   try {
      return createSupabaseClient(supabaseUrl, supabaseAnonKey)
    } catch (error) {
-     console.error('Failed to create Supabase client:', error)
      throw error
    }
 }

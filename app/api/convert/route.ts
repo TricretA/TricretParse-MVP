@@ -30,8 +30,7 @@ import { convertToJSON, convertToAdvancedJSON, repairJSON, autoDetectSchema } fr
  * ```json
  * {
  *   "type": "convert",
- *   "inputText": "John Doe, age 30, works at TechCorp",
- *   "conversationHistory": []
+ *   "inputText": "John Doe, age 30, works at TechCorp"
  * }
  * ```
  * 
@@ -46,47 +45,51 @@ import { convertToJSON, convertToAdvancedJSON, repairJSON, autoDetectSchema } fr
  */
 export async function POST(req: Request) {
   try {
+    // Security: Validate request body exists and is valid JSON
     const body = await req.json()
-    console.log("API Route - Request body:", body)
-
-    const { type, inputText, invalidJSON, validationErrors, conversationHistory, message } = body
+    
+    // Security: Input validation and sanitization
+    const { type, inputText, invalidJSON, validationErrors, message } = body
+    
+    // Security: Validate required fields and prevent injection
+    if (!type || typeof type !== 'string') {
+      return NextResponse.json({ success: false, error: "Invalid or missing request type" })
+    }
+    
+    // Security: Limit input text length to prevent abuse
+    const maxInputLength = 10000
+    if (inputText && typeof inputText === 'string' && inputText.length > maxInputLength) {
+      return NextResponse.json({ success: false, error: "Input text too long" })
+    }
+    
+    if (message && typeof message === 'string' && message.length > maxInputLength) {
+      return NextResponse.json({ success: false, error: "Message too long" })
+    }
 
     if (type === "convert" || type === "conversation") {
-      console.log("API Route - Processing basic natural language conversion")
-
       const userMessage = message || inputText
-      const result = await convertToJSON(userMessage, conversationHistory)
-
-      console.log("API Route - Basic conversion result:", { status: result.status, hasJson: !!result.json })
+      const result = await convertToJSON(userMessage, [])
       return NextResponse.json(result)
     }
 
     if (type === "advanced") {
-      console.log("API Route - Processing advanced natural language conversion")
-
       const userMessage = message || inputText
-      const result = await convertToAdvancedJSON(userMessage, conversationHistory)
-
-      console.log("API Route - Advanced conversion result:", { status: result.status, hasJson: !!result.json })
+      const result = await convertToAdvancedJSON(userMessage, [])
       return NextResponse.json(result)
     }
 
     if (type === "repair") {
-      console.log("API Route - Repairing JSON")
       const result = await repairJSON(invalidJSON, validationErrors)
       return NextResponse.json(result)
     }
 
     if (type === "detectSchema") {
-      console.log("API Route - Schema detection (simplified)")
       const result = await autoDetectSchema(inputText, [])
       return NextResponse.json(result)
     }
 
-    console.error("API Route - Invalid request type:", type)
     return NextResponse.json({ success: false, error: "Invalid request type" })
   } catch (error) {
-    console.error("API route error:", error)
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : "Server error",

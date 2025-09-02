@@ -28,21 +28,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
-/**
- * Interface for tracking conversion history entries
- * 
- * @interface ConversionHistory
- * @property {string} id - Unique identifier for the conversion
- * @property {string} input - Original input text provided by user
- * @property {string} output - Generated JSON output from conversion
- * @property {Date} timestamp - When the conversion was performed
- */
-interface ConversionHistory {
-  id: string
-  input: string
-  output: string
-  timestamp: Date
-}
+
 
 /**
  * Main HomePage component for TricretParse MVP
@@ -62,9 +48,7 @@ export default function HomePage() {
   const [isLoading, setIsLoading] = useState(false) // Basic conversion loading
   const [isAdvancedLoading, setIsAdvancedLoading] = useState(false) // Advanced AI conversion loading
   
-  // History and conversation tracking
-  const [history, setHistory] = useState<ConversionHistory[]>([]) // Conversion history
-  const [conversationHistory, setConversationHistory] = useState<Array<{ role: string; content: string }>>([]) // AI conversation context
+
   
   // Waitlist form state
   const [email, setEmail] = useState("") // User email for waitlist
@@ -104,7 +88,6 @@ export default function HomePage() {
         body: JSON.stringify({
           type: "convert",
           inputText: inputText.trim(),
-          conversationHistory,
         }),
       })
 
@@ -113,12 +96,6 @@ export default function HomePage() {
       if (result.status === "need_info") {
         // AI is asking for more information
         const aiQuestion = result.questions?.[0] || "Could you provide more details?"
-        setConversationHistory((prev) => [
-          ...prev,
-          { role: "user", content: inputText },
-          { role: "assistant", content: aiQuestion },
-        ])
-
         setOutputJson(`AI Response: ${aiQuestion}
 
 Please provide more details and try converting again.`)
@@ -130,22 +107,6 @@ Please provide more details and try converting again.`)
       } else if (result.status === "ready" && result.json) {
         // Successful conversion
         setOutputJson(result.json)
-
-        // Add to conversation history
-        setConversationHistory((prev) => [
-          ...prev,
-          { role: "user", content: inputText },
-          { role: "assistant", content: result.json },
-        ])
-
-        // Add to local history
-        const newHistoryItem: ConversionHistory = {
-          id: Date.now().toString(),
-          input: inputText,
-          output: result.json,
-          timestamp: new Date(),
-        }
-        setHistory((prev) => [newHistoryItem, ...prev.slice(0, 4)])
 
         toast({
           title: "JSON Generated!",
@@ -160,7 +121,6 @@ Please provide more details and try converting again.`)
         })
       }
     } catch (error) {
-      console.error("Conversion error:", error)
       setOutputJson("Error: Could not process your request. Please try again.")
       toast({
         title: "Connection Error",
@@ -203,7 +163,6 @@ Please provide more details and try converting again.`)
         body: JSON.stringify({
           type: "advanced",
           inputText: inputText.trim(),
-          conversationHistory,
         }),
       })
 
@@ -212,12 +171,6 @@ Please provide more details and try converting again.`)
       if (result.status === "need_info") {
         // AI is asking for more information
         const aiQuestion = result.questions?.[0] || "Could you provide more details?"
-        setConversationHistory((prev) => [
-          ...prev,
-          { role: "user", content: inputText },
-          { role: "assistant", content: aiQuestion },
-        ])
-
         setOutputJson(`AI Response: ${aiQuestion}
 
 Please provide more details and try converting again.`)
@@ -229,22 +182,6 @@ Please provide more details and try converting again.`)
       } else if (result.status === "ready" && result.json) {
         // Successful conversion
         setOutputJson(result.json)
-
-        // Add to conversation history
-        setConversationHistory((prev) => [
-          ...prev,
-          { role: "user", content: inputText },
-          { role: "assistant", content: result.json },
-        ])
-
-        // Add to local history
-        const newHistoryItem: ConversionHistory = {
-          id: Date.now().toString(),
-          input: inputText,
-          output: result.json,
-          timestamp: new Date(),
-        }
-        setHistory((prev) => [newHistoryItem, ...prev.slice(0, 4)])
 
         toast({
           title: "Advanced JSON Generated!",
@@ -259,7 +196,6 @@ Please provide more details and try converting again.`)
         })
       }
     } catch (error) {
-      console.error("Advanced conversion error:", error)
       setOutputJson("Error: Could not process your advanced request. Please try again.")
       toast({
         title: "Connection Error",
@@ -272,7 +208,7 @@ Please provide more details and try converting again.`)
   }
 
   /**
-   * Clears all input, output, and conversation history
+   * Clears all input and output
    * 
    * Resets the application state to allow for a fresh conversion session.
    * 
@@ -282,7 +218,6 @@ Please provide more details and try converting again.`)
   const handleClear = () => {
     setInputText("")
     setOutputJson("")
-    setConversationHistory([])
   }
 
   /**
@@ -305,20 +240,7 @@ Please provide more details and try converting again.`)
     }
   }
 
-  /**
-   * Loads a previous conversion from history
-   * 
-   * Restores both the input text and output JSON from a selected history item,
-   * allowing users to review or modify previous conversions.
-   * 
-   * @function loadHistoryItem
-   * @param {ConversionHistory} item - The history item to load
-   * @returns {void}
-   */
-  const loadHistoryItem = (item: ConversionHistory) => {
-    setInputText(item.input)
-    setOutputJson(item.output)
-  }
+
 
   /**
    * Handles waitlist signup form submission
@@ -361,7 +283,6 @@ Please provide more details and try converting again.`)
         ])
 
       if (error) {
-        console.error("Supabase error:", error)
         toast({
           title: "Submission Failed",
           description: "There was an error joining the waitlist. Please try again.",
@@ -378,7 +299,6 @@ Please provide more details and try converting again.`)
       setEmail("")
       setTool("")
     } catch (error) {
-      console.error("Waitlist submission error:", error)
       toast({
         title: "Submission Failed",
         description: "There was an error joining the waitlist. Please try again.",
@@ -583,29 +503,7 @@ Please provide more details and try converting again.`)
           </Card>
         </div>
 
-        {/* History Panel */}
-        {history.length > 0 && (
-          <Card className="glass glow-accent p-6 mt-6">
-            <h3 className="text-lg font-semibold text-foreground mb-4">Recent Conversions</h3>
-            <div className="space-y-2">
-              {history.map((item) => (
-                <div
-                  key={item.id}
-                  className="flex items-center justify-between p-3 bg-background/30 rounded-lg border border-glass-border cursor-pointer hover:bg-background/50 transition-colors"
-                  onClick={() => loadHistoryItem(item)}
-                >
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm text-foreground truncate">{item.input}</p>
-                    <p className="text-xs text-muted-foreground">{item.timestamp.toLocaleString()}</p>
-                  </div>
-                  <Button variant="ghost" size="sm">
-                    <Copy className="w-4 h-4" />
-                  </Button>
-                </div>
-              ))}
-            </div>
-          </Card>
-        )}
+
       </main>
 
 

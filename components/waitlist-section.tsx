@@ -48,7 +48,6 @@ export default function WaitlistSection() {
       const { error } = await supabase.from("waitlist").insert([{ email: email.trim(), tool }])
 
       if (error) {
-        console.error("Waitlist error:", error)
         if (error.code === "23505" || error.message.includes("duplicate") || error.message.includes("unique")) {
           toast({
             title: "Already on the waitlist!",
@@ -70,7 +69,6 @@ export default function WaitlistSection() {
         setTool("")
       }
     } catch (error) {
-      console.error("Waitlist submission error:", error)
       toast({
         title: "Connection Error",
         description: "Could not submit your request. Please try again.",
