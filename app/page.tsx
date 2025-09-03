@@ -27,7 +27,7 @@ import { useToast } from "@/hooks/use-toast"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-// import { createClient } from "@/lib/supabase/client"
+import { createClient } from "@/lib/supabase/client"
 
 
 
@@ -270,27 +270,29 @@ Please provide more details and try converting again.`)
     setIsSubmitting(true)
 
     try {
-      // Temporarily disabled Supabase for build testing
-      // const supabase = createClient()
-      // 
-      // const { error } = await supabase
-      //   .from("waitlist")
-      //   .insert([
-      //     {
-      //       email: email.trim(),
-      //       tool_interest: tool,
-      //       created_at: new Date().toISOString(),
-      //     },
-      //   ])
-      //
-      // if (error) {
-      //   toast({
-      //     title: "Submission Failed",
-      //     description: "There was an error joining the waitlist. Please try again.",
-      //     variant: "destructive",
-      //   })
-      //   return
-      // }
+      // Only run Supabase code on client-side
+      if (typeof window !== 'undefined') {
+        const supabase = createClient()
+        
+        const { error } = await supabase
+          .from("waitlist")
+          .insert([
+            {
+              email: email.trim(),
+              tool_interest: tool,
+              created_at: new Date().toISOString(),
+            },
+          ])
+
+        if (error) {
+          toast({
+            title: "Submission Failed",
+            description: "There was an error joining the waitlist. Please try again.",
+            variant: "destructive",
+          })
+          return
+        }
+      }
 
       toast({
         title: "Welcome to the Waitlist! 🎉",
@@ -330,7 +332,7 @@ Please provide more details and try converting again.`)
             <div className="flex items-center gap-2 sm:gap-4">
               <Badge variant="secondary" className="glass text-xs sm:text-sm">
                 <span className="hidden sm:inline">#1 Free</span>
-                <span className="sm:hidden">{history.length}</span>
+                <span className="sm:hidden">Free</span>
               </Badge>
               <Dialog>
                 <DialogTrigger asChild>
